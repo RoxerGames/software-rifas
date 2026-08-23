@@ -11,12 +11,12 @@ import {
 
 // PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_MESSAGING_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyBZoIvHQaJj2Toye9q1O8O1y1QICpnvokg",
+  authDomain: "software-rifas-de077.firebaseapp.com",
+  projectId: "software-rifas-de077",
+  storageBucket: "software-rifas-de077.firebasestorage.app",
+  messagingSenderId: "690275251113",
+  appId: "1:690275251113:web:e659eca409672e3dd2cab8"
 };
 
 // Inicialización de Firebase
