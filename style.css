@@ -5,7 +5,8 @@
   --accent-hover: #2563eb;
   --available: #10b981;
   --selected: #f59e0b;
-  --sold: #ef4444;
+  --paid: #ef4444;
+  --pending: #a855f7;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border: #334155;
@@ -28,15 +29,15 @@ body {
 
 .container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1150px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
-@media (min-width: 860px) {
+@media (min-width: 890px) {
   .container {
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 350px 1fr;
   }
 }
 
@@ -114,7 +115,7 @@ label {
   color: var(--text-muted);
 }
 
-input[type="text"] {
+input[type="text"], .select-input {
   width: 100%;
   padding: 0.75rem;
   border-radius: 8px;
@@ -124,7 +125,7 @@ input[type="text"] {
   outline: none;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus, .select-input:focus {
   border-color: var(--accent);
 }
 
@@ -211,15 +212,21 @@ button:disabled {
   font-weight: bold;
 }
 
-.num-box.sold {
-  background-color: rgba(239, 68, 68, 0.15);
-  border: 1px solid var(--sold);
+.num-box.paid {
+  background-color: rgba(239, 68, 68, 0.18);
+  border: 1px solid var(--paid);
   color: #f87171;
   cursor: not-allowed;
-  opacity: 0.8;
 }
 
-/* Tabla de Vendidos */
+.num-box.pending {
+  background-color: rgba(168, 85, 247, 0.18);
+  border: 1px solid var(--pending);
+  color: #c084fc;
+  cursor: not-allowed;
+}
+
+/* Tabla de Registros */
 .table-wrapper {
   max-height: 250px;
   overflow-y: auto;
@@ -228,13 +235,14 @@ button:disabled {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   text-align: left;
 }
 
 th, td {
-  padding: 0.6rem;
+  padding: 0.5rem 0.4rem;
   border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 
 th {
@@ -244,15 +252,48 @@ th {
   background: var(--card-bg);
 }
 
+/* Badges interactivos de Estado */
+.status-badge {
+  display: inline-block;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.72rem;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.status-badge:hover {
+  opacity: 0.8;
+}
+
+.status-badge.paid {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid var(--paid);
+}
+
+.status-badge.pending {
+  background-color: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid var(--pending);
+}
+
 .delete-btn {
   width: auto;
-  padding: 2px 6px;
-  background: #dc2626;
+  padding: 3px 6px;
+  background: #475569;
   font-size: 0.75rem;
   border-radius: 4px;
 }
 
-/* Apartado para Compartir */
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* Compartir */
 .share-section {
   margin-top: 0.5rem;
 }

@@ -19,6 +19,14 @@
       <input type="text" id="buyerName" placeholder="Ej. Juan Pérez" autocomplete="off">
     </div>
 
+    <div class="form-group">
+      <label for="paymentStatus">Estado del Pago</label>
+      <select id="paymentStatus" class="select-input">
+        <option value="pagado">🟢 Pagado</option>
+        <option value="pendiente" selected>🟣 Pendiente</option>
+      </select>
+    </div>
+
     <label>Números Seleccionados</label>
     <div class="selected-tags" id="selectedTags">
       <span style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en los números...</span>
@@ -35,6 +43,7 @@
           <tr>
             <th>Núm</th>
             <th>Comprador</th>
+            <th>Estado</th>
             <th></th>
           </tr>
         </thead>
@@ -49,14 +58,15 @@
   <main class="card">
     <div class="stats-bar">
       <div class="stat-pill">Disponibles <strong id="statAvailable" style="color: var(--available);">100</strong></div>
-      <div class="stat-pill">Seleccionados <strong id="statSelected" style="color: var(--selected);">0</strong></div>
-      <div class="stat-pill">Vendidos <strong id="statSold" style="color: var(--sold);">0</strong></div>
+      <div class="stat-pill">Pendientes <strong id="statPending" style="color: var(--pending);">0</strong></div>
+      <div class="stat-pill">Pagados <strong id="statPaid" style="color: var(--paid);">0</strong></div>
     </div>
 
     <div class="legend">
       <div class="legend-item"><div class="legend-box" style="background: var(--available);"></div> Disponible</div>
       <div class="legend-item"><div class="legend-box" style="background: var(--selected);"></div> Seleccionado</div>
-      <div class="legend-item"><div class="legend-box" style="background: var(--sold);"></div> Vendido</div>
+      <div class="legend-item"><div class="legend-box" style="background: var(--pending);"></div> Pendiente</div>
+      <div class="legend-item"><div class="legend-box" style="background: var(--paid);"></div> Pagado</div>
     </div>
 
     <div class="grid-container" id="grid">

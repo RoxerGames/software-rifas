@@ -3,6 +3,7 @@ import {
   getFirestore, 
   collection, 
   doc, 
+  updateDoc,
   deleteDoc, 
   onSnapshot, 
   writeBatch 
@@ -10,12 +11,12 @@ import {
 
 // PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyBZoIvHQaJj2Toye9q1O8O1y1QICpnvokg",
-  authDomain: "software-rifas-de077.firebaseapp.com",
-  projectId: "software-rifas-de077",
-  storageBucket: "software-rifas-de077.firebasestorage.app",
-  messagingSenderId: "690275251113",
-  appId: "1:690275251113:web:e659eca409672e3dd2cab8"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_PROYECTO.appspot.com",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID"
 };
 
 // Inicialización de Firebase
@@ -24,7 +25,7 @@ const db = getFirestore(app);
 const raffleCollection = collection(db, "numeros_rifa");
 
 const TOTAL_NUMBERS = 100;
-let soldNumbers = {}; 
+let soldNumbers = {}; // Formato: { "05": { buyer: "Juan", status: "pagado" } }
 let selectedNumbers = new Set();
 
 function initGrid() {
@@ -44,7 +45,7 @@ function initGrid() {
 }
 
 function toggleNumber(num) {
-  if (soldNumbers[num]) return;
+  if (soldNumbers[num]) return; // Ocupado (pagado o pendiente)
 
   if (selectedNumbers.has(num)) {
     selectedNumbers.delete(num);
@@ -62,8 +63,10 @@ function renderGridState() {
     box.className = 'num-box';
     
     if (soldNumbers[num]) {
-      box.classList.add('sold');
-      box.title = `Vendido a: ${soldNumbers[num]}`;
+      const data = soldNumbers[num];
+      const isPaid = data.status === 'pagado';
+      box.classList.add(isPaid ? 'paid' : 'pending');
+      box.title = `${data.buyer} (${isPaid ? 'Pagado' : 'Pendiente'})`;
     } else if (selectedNumbers.has(num)) {
       box.classList.add('selected');
       box.title = 'Seleccionado';
@@ -90,23 +93,31 @@ function updateUI() {
     });
   }
 
-  // 2. Cálculo de disponibles
+  // 2. Cálculo de disponibles y conteo por estados
   const availableList = [];
+  let paidCount = 0;
+  let pendingCount = 0;
+
   for (let i = 0; i < TOTAL_NUMBERS; i++) {
     const numStr = i.toString().padStart(2, '0');
-    if (!soldNumbers[numStr]) {
+    if (soldNumbers[numStr]) {
+      if (soldNumbers[numStr].status === 'pagado') {
+        paidCount++;
+      } else {
+        pendingCount++;
+      }
+    } else {
       availableList.push(numStr);
     }
   }
 
-  // 3. Contadores
-  const soldCount = Object.keys(soldNumbers).length;
   const selectedCount = selectedNumbers.size;
   const availableCount = availableList.length - selectedCount;
 
+  // 3. Actualizar contadores
   document.getElementById('statAvailable').textContent = availableCount;
-  document.getElementById('statSelected').textContent = selectedCount;
-  document.getElementById('statSold').textContent = soldCount;
+  document.getElementById('statPaid').textContent = paidCount;
+  document.getElementById('statPending').textContent = pendingCount;
 
   // 4. Estado de botón
   const buyerName = document.getElementById('buyerName').value.trim();
@@ -122,7 +133,7 @@ function updateUI() {
 function updateAvailableText(availableList) {
   const textArea = document.getElementById('availableText');
   if (availableList.length === 0) {
-    textArea.value = "🎟️ ¡TODOS LOS NÚMEROS HAN SIDO VENDIDOS! 🎉";
+    textArea.value = "🎟️ ¡TODOS LOS NÚMEROS HAN SIDO RESERVADOS/VENDIDOS! 🎉";
     return;
   }
 
@@ -132,7 +143,6 @@ function updateAvailableText(availableList) {
   textArea.value = message;
 }
 
-// Función global para copiar al portapapeles
 window.copyAvailableText = function() {
   const textArea = document.getElementById('availableText');
   const btn = document.getElementById('btnCopy');
@@ -148,7 +158,7 @@ window.copyAvailableText = function() {
     }, 2000);
   }).catch(err => {
     console.error("Error al copiar:", err);
-    alert("No se pudo copiar automáticamente. Por favor selecciónalo y cópialo manualmente.");
+    alert("No se pudo copiar automáticamente. Selecciónalo y cópialo manualmente.");
   });
 };
 
@@ -159,21 +169,50 @@ function renderTable() {
   const sortedKeys = Object.keys(soldNumbers).sort();
 
   sortedKeys.forEach(num => {
+    const data = soldNumbers[num];
+    const isPaid = data.status === 'pagado';
     const tr = document.createElement('tr');
+    
     tr.innerHTML = `
-      <td style="font-weight: bold; color: var(--sold);">${num}</td>
-      <td>${soldNumbers[num]}</td>
-      <td><button class="delete-btn" data-num="${num}">Liberar</button></td>
+      <td style="font-weight: bold; color: ${isPaid ? 'var(--paid)' : 'var(--pending)'};">${num}</td>
+      <td>${data.buyer}</td>
+      <td>
+        <button class="status-badge ${isPaid ? 'paid' : 'pending'}" title="Haz clic para alternar estado">
+          ${isPaid ? 'Pagado' : 'Pendiente'}
+        </button>
+      </td>
+      <td><button class="delete-btn" title="Liberar número">✕</button></td>
     `;
 
+    // Cambiar estado con clic
+    tr.querySelector('.status-badge').addEventListener('click', () => toggleStatus(num, data.status));
+
+    // Liberar número
     tr.querySelector('.delete-btn').addEventListener('click', () => releaseNumber(num));
+
     tbody.appendChild(tr);
   });
 }
 
+// Alternar entre Pagado y Pendiente en Firestore
+async function toggleStatus(num, currentStatus) {
+  const nextStatus = currentStatus === 'pagado' ? 'pendiente' : 'pagado';
+  try {
+    const docRef = doc(raffleCollection, num);
+    await updateDoc(docRef, {
+      status: nextStatus
+    });
+  } catch (error) {
+    console.error("Error al actualizar estado:", error);
+    alert("No se pudo actualizar el estado.");
+  }
+}
+
+// Registrar compra con el estado seleccionado
 async function registerPurchase() {
   const buyerInput = document.getElementById('buyerName');
   const name = buyerInput.value.trim();
+  const status = document.getElementById('paymentStatus').value;
 
   if (!name || selectedNumbers.size === 0) return;
 
@@ -188,6 +227,7 @@ async function registerPurchase() {
       const docRef = doc(raffleCollection, num);
       batch.set(docRef, {
         buyer: name,
+        status: status,
         createdAt: new Date().toISOString()
       });
     });
@@ -221,7 +261,11 @@ function listenToRaffleUpdates() {
     soldNumbers = {};
     
     snapshot.forEach(docSnap => {
-      soldNumbers[docSnap.id] = docSnap.data().buyer;
+      const data = docSnap.data();
+      soldNumbers[docSnap.id] = {
+        buyer: data.buyer || "Sin nombre",
+        status: data.status || "pendiente"
+      };
       selectedNumbers.delete(docSnap.id);
     });
 
