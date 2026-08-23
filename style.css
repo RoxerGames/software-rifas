@@ -49,12 +49,18 @@ body {
 }
 
 h1, h2 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   margin-bottom: 1rem;
   color: #fff;
 }
 
-/* Leyenda y Estadísticas */
+.separator {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* Leyenda y Stats */
 .stats-bar {
   display: flex;
   gap: 0.5rem;
@@ -153,7 +159,7 @@ button {
   color: white;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 
 button:hover {
@@ -170,7 +176,7 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
   gap: 0.4rem;
-  max-height: 400px;
+  max-height: 360px;
   overflow-y: auto;
   padding-right: 0.4rem;
 }
@@ -244,4 +250,47 @@ th {
   background: #dc2626;
   font-size: 0.75rem;
   border-radius: 4px;
+}
+
+/* Apartado para Compartir */
+.share-section {
+  margin-top: 0.5rem;
+}
+
+.share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-header h2 {
+  margin-bottom: 0;
+}
+
+.btn-copy {
+  width: auto;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  background-color: #059669;
+}
+
+.btn-copy:hover {
+  background-color: #047857;
+}
+
+textarea {
+  width: 100%;
+  height: 90px;
+  background: #0b1120;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
 }

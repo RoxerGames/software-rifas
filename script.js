@@ -1,16 +1,14 @@
-// 1. Importar los módulos necesarios de Firebase desde CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
   getFirestore, 
   collection, 
   doc, 
-  setDoc, 
   deleteDoc, 
   onSnapshot, 
   writeBatch 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 2. PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+// PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyBZoIvHQaJj2Toye9q1O8O1y1QICpnvokg",
   authDomain: "software-rifas-de077.firebaseapp.com",
@@ -20,16 +18,15 @@ const firebaseConfig = {
   appId: "1:690275251113:web:e659eca409672e3dd2cab8"
 };
 
-// 3. Inicializar Firebase y Firestore
+// Inicialización de Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const raffleCollection = collection(db, "numeros_rifa");
 
-const TOTAL_NUMBERS = 100; // Del 00 al 99
+const TOTAL_NUMBERS = 100;
 let soldNumbers = {}; 
 let selectedNumbers = new Set();
 
-// 4. Crear la cuadrícula visual de 100 números
 function initGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -46,9 +43,8 @@ function initGrid() {
   }
 }
 
-// 5. Manejar selección / deselección de números
 function toggleNumber(num) {
-  if (soldNumbers[num]) return; // Si ya está vendido, ignorar clic
+  if (soldNumbers[num]) return;
 
   if (selectedNumbers.has(num)) {
     selectedNumbers.delete(num);
@@ -60,7 +56,6 @@ function toggleNumber(num) {
   updateUI();
 }
 
-// 6. Actualizar las clases CSS según el estado de cada número
 function renderGridState() {
   document.querySelectorAll('.num-box').forEach(box => {
     const num = box.dataset.num;
@@ -79,8 +74,8 @@ function renderGridState() {
   });
 }
 
-// 7. Actualizar elementos de la interfaz de usuario
 function updateUI() {
+  // 1. Tags seleccionados
   const container = document.getElementById('selectedTags');
   container.innerHTML = '';
   
@@ -95,21 +90,68 @@ function updateUI() {
     });
   }
 
+  // 2. Cálculo de disponibles
+  const availableList = [];
+  for (let i = 0; i < TOTAL_NUMBERS; i++) {
+    const numStr = i.toString().padStart(2, '0');
+    if (!soldNumbers[numStr]) {
+      availableList.push(numStr);
+    }
+  }
+
+  // 3. Contadores
   const soldCount = Object.keys(soldNumbers).length;
   const selectedCount = selectedNumbers.size;
-  const availableCount = TOTAL_NUMBERS - soldCount - selectedCount;
+  const availableCount = availableList.length - selectedCount;
 
   document.getElementById('statAvailable').textContent = availableCount;
   document.getElementById('statSelected').textContent = selectedCount;
   document.getElementById('statSold').textContent = soldCount;
 
+  // 4. Estado de botón
   const buyerName = document.getElementById('buyerName').value.trim();
   document.getElementById('btnBuy').disabled = !(buyerName.length > 0 && selectedNumbers.size > 0);
 
+  // 5. Generar texto de números disponibles
+  updateAvailableText(availableList);
+
+  // 6. Tabla
   renderTable();
 }
 
-// 8. Renderizar la tabla de compradores
+function updateAvailableText(availableList) {
+  const textArea = document.getElementById('availableText');
+  if (availableList.length === 0) {
+    textArea.value = "🎟️ ¡TODOS LOS NÚMEROS HAN SIDO VENDIDOS! 🎉";
+    return;
+  }
+
+  const listFormatted = availableList.join(' - ');
+  const message = `🎟️ *NÚMEROS DISPONIBLES DE LA RIFA* (${availableList.length} disponibles):\n\n${listFormatted}\n\n¡Elige el tuyo antes de que se agoten! ✨`;
+  
+  textArea.value = message;
+}
+
+// Función global para copiar al portapapeles
+window.copyAvailableText = function() {
+  const textArea = document.getElementById('availableText');
+  const btn = document.getElementById('btnCopy');
+  
+  navigator.clipboard.writeText(textArea.value).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = "✅ ¡Copiado!";
+    btn.style.backgroundColor = "#10b981";
+
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.backgroundColor = "";
+    }, 2000);
+  }).catch(err => {
+    console.error("Error al copiar:", err);
+    alert("No se pudo copiar automáticamente. Por favor selecciónalo y cópialo manualmente.");
+  });
+};
+
 function renderTable() {
   const tbody = document.getElementById('soldTableBody');
   tbody.innerHTML = '';
@@ -129,7 +171,6 @@ function renderTable() {
   });
 }
 
-// 9. Registrar compra en Firestore (Usa Batch para guardar múltiples números a la vez)
 async function registerPurchase() {
   const buyerInput = document.getElementById('buyerName');
   const name = buyerInput.value.trim();
@@ -153,19 +194,17 @@ async function registerPurchase() {
 
     await batch.commit();
 
-    // Limpiar selección local
     selectedNumbers.clear();
     buyerInput.value = '';
   } catch (error) {
     console.error("Error al registrar la compra:", error);
-    alert("Hubo un error al guardar los números. Revisa la consola.");
+    alert("Hubo un error al guardar.");
   } finally {
     btnBuy.textContent = "Registrar Compra";
     updateUI();
   }
 }
 
-// 10. Liberar un número en Firestore
 async function releaseNumber(num) {
   if (confirm(`¿Deseas liberar el número ${num}?`)) {
     try {
@@ -177,25 +216,22 @@ async function releaseNumber(num) {
   }
 }
 
-// 11. Escuchar cambios en tiempo real desde Firestore
 function listenToRaffleUpdates() {
   onSnapshot(raffleCollection, (snapshot) => {
     soldNumbers = {};
     
     snapshot.forEach(docSnap => {
       soldNumbers[docSnap.id] = docSnap.data().buyer;
-      // Si el número vendido estaba en la selección temporal de alguien, se desmarca
       selectedNumbers.delete(docSnap.id);
     });
 
     renderGridState();
     updateUI();
   }, (error) => {
-    console.error("Error al escuchar la base de datos:", error);
+    console.error("Error en Firebase:", error);
   });
 }
 
-// 12. Inicialización
 initGrid();
 listenToRaffleUpdates();
 
