@@ -19,13 +19,12 @@ const firebaseConfig = {
   appId: "1:690275251113:web:e659eca409672e3dd2cab8"
 };
 
-// Inicialización de Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const raffleCollection = collection(db, "numeros_rifa");
 
 const TOTAL_NUMBERS = 100;
-let soldNumbers = {}; // Formato: { "05": { buyer: "Juan", status: "pagado" } }
+let soldNumbers = {};
 let selectedNumbers = new Set();
 
 function initGrid() {
@@ -45,7 +44,7 @@ function initGrid() {
 }
 
 function toggleNumber(num) {
-  if (soldNumbers[num]) return; // Ocupado (pagado o pendiente)
+  if (soldNumbers[num]) return;
 
   if (selectedNumbers.has(num)) {
     selectedNumbers.delete(num);
@@ -114,7 +113,7 @@ function updateUI() {
   const selectedCount = selectedNumbers.size;
   const availableCount = availableList.length - selectedCount;
 
-  // 3. Actualizar contadores
+  // 3. Contadores
   document.getElementById('statAvailable').textContent = availableCount;
   document.getElementById('statPaid').textContent = paidCount;
   document.getElementById('statPending').textContent = pendingCount;
@@ -126,7 +125,7 @@ function updateUI() {
   // 5. Generar texto de números disponibles
   updateAvailableText(availableList);
 
-  // 6. Tabla
+  // 6. Tabla con filtro
   renderTable();
 }
 
@@ -158,7 +157,7 @@ window.copyAvailableText = function() {
     }, 2000);
   }).catch(err => {
     console.error("Error al copiar:", err);
-    alert("No se pudo copiar automáticamente. Selecciónalo y cópialo manualmente.");
+    alert("No se pudo copiar automáticamente.");
   });
 };
 
@@ -166,9 +165,22 @@ function renderTable() {
   const tbody = document.getElementById('soldTableBody');
   tbody.innerHTML = '';
 
+  const searchTerm = document.getElementById('searchBuyer').value.toLowerCase().trim();
   const sortedKeys = Object.keys(soldNumbers).sort();
 
-  sortedKeys.forEach(num => {
+  const filteredKeys = sortedKeys.filter(num => {
+    const buyer = soldNumbers[num].buyer.toLowerCase();
+    return buyer.includes(searchTerm) || num.includes(searchTerm);
+  });
+
+  if (filteredKeys.length === 0 && sortedKeys.length > 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1rem;">No se encontraron compradores</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  filteredKeys.forEach(num => {
     const data = soldNumbers[num];
     const isPaid = data.status === 'pagado';
     const tr = document.createElement('tr');
@@ -184,31 +196,24 @@ function renderTable() {
       <td><button class="delete-btn" title="Liberar número">✕</button></td>
     `;
 
-    // Cambiar estado con clic
     tr.querySelector('.status-badge').addEventListener('click', () => toggleStatus(num, data.status));
-
-    // Liberar número
     tr.querySelector('.delete-btn').addEventListener('click', () => releaseNumber(num));
 
     tbody.appendChild(tr);
   });
 }
 
-// Alternar entre Pagado y Pendiente en Firestore
 async function toggleStatus(num, currentStatus) {
   const nextStatus = currentStatus === 'pagado' ? 'pendiente' : 'pagado';
   try {
     const docRef = doc(raffleCollection, num);
-    await updateDoc(docRef, {
-      status: nextStatus
-    });
+    await updateDoc(docRef, { status: nextStatus });
   } catch (error) {
     console.error("Error al actualizar estado:", error);
     alert("No se pudo actualizar el estado.");
   }
 }
 
-// Registrar compra con el estado seleccionado
 async function registerPurchase() {
   const buyerInput = document.getElementById('buyerName');
   const name = buyerInput.value.trim();
@@ -280,4 +285,5 @@ initGrid();
 listenToRaffleUpdates();
 
 document.getElementById('buyerName').addEventListener('input', updateUI);
+document.getElementById('searchBuyer').addEventListener('input', renderTable);
 document.getElementById('btnBuy').addEventListener('click', registerPurchase);

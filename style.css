@@ -103,9 +103,13 @@ h1, h2 {
   border-radius: 3px;
 }
 
-/* Formulario */
+/* Formulario y Búsqueda */
 .form-group {
   margin-bottom: 1rem;
+}
+
+.search-group {
+  margin-bottom: 0.75rem;
 }
 
 label {
@@ -123,6 +127,11 @@ input[type="text"], .select-input {
   background: #0b1120;
   color: var(--text-main);
   outline: none;
+}
+
+#searchBuyer {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
 }
 
 input[type="text"]:focus, .select-input:focus {
@@ -252,7 +261,6 @@ th {
   background: var(--card-bg);
 }
 
-/* Badges interactivos de Estado */
 .status-badge {
   display: inline-block;
   padding: 3px 6px;
