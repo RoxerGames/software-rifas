@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Rifa</title>
+  <!-- Conexión con la hoja de estilos -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Panel Lateral: Registro y Resumen -->
+  <aside class="card">
+    <h2>Registrar Compra</h2>
+    
+    <div class="form-group">
+      <label for="buyerName">Nombre del Comprador</label>
+      <input type="text" id="buyerName" placeholder="Ej. Juan Pérez" autocomplete="off">
+    </div>
+
+    <label>Números Seleccionados</label>
+    <div class="selected-tags" id="selectedTags">
+      <span style="color: var(--text-muted); font-size: 0.8rem;">Haz clic en los números...</span>
+    </div>
+
+    <button id="btnBuy" onclick="registerPurchase()" disabled>Registrar Compra</button>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0;">
+
+    <h2>Lista de Compradores</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Núm</th>
+            <th>Comprador</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="soldTableBody">
+          <!-- Filas dinámicas -->
+        </tbody>
+      </table>
+    </div>
+  </aside>
+
+  <!-- Panel Central: Tablero de Números -->
+  <main class="card">
+    <div class="stats-bar">
+      <div class="stat-pill">Disponibles <strong id="statAvailable" style="color: var(--available);">100</strong></div>
+      <div class="stat-pill">Seleccionados <strong id="statSelected" style="color: var(--selected);">0</strong></div>
+      <div class="stat-pill">Vendidos <strong id="statSold" style="color: var(--sold);">0</strong></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-box" style="background: var(--available);"></div> Disponible</div>
+      <div class="legend-item"><div class="legend-box" style="background: var(--selected);"></div> Seleccionado</div>
+      <div class="legend-item"><div class="legend-box" style="background: var(--sold);"></div> Vendido</div>
+    </div>
+
+    <div class="grid-container" id="grid">
+      <!-- Celdas dinámicas -->
+    </div>
+  </main>
+
+</div>
+
+  <!-- Conexión con el archivo JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
