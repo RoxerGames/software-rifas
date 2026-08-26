@@ -10,7 +10,7 @@
 
 <div class="container">
 
-  <!-- Panel Lateral: Registro y Resumen -->
+  <!-- Panel Lateral: Registro, Ganador y Resumen -->
   <aside class="card">
     <h2>Registrar Compra</h2>
     
@@ -36,9 +36,18 @@
 
     <hr class="separator">
 
+    <!-- Apartado: Consultar Número Ganador -->
+    <h2>🏆 Consultar Ganador</h2>
+    <div class="winner-input-group">
+      <input type="text" id="winnerInput" maxlength="2" placeholder="00" autocomplete="off">
+      <button id="btnCheckWinner" class="btn-winner" onclick="checkWinner()">Verificar</button>
+    </div>
+    <div id="winnerResult" class="winner-box" style="display: none;"></div>
+
+    <hr class="separator">
+
     <h2>Lista de Compradores</h2>
     
-    <!-- Buscador de Compradores -->
     <div class="search-group">
       <input type="text" id="searchBuyer" placeholder="🔍 Buscar por nombre..." autocomplete="off">
     </div>

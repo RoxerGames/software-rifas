@@ -92,7 +92,7 @@ function updateUI() {
     });
   }
 
-  // 2. Cálculo de disponibles y conteo por estados
+  // 2. Conteo
   const availableList = [];
   let paidCount = 0;
   let pendingCount = 0;
@@ -113,20 +113,21 @@ function updateUI() {
   const selectedCount = selectedNumbers.size;
   const availableCount = availableList.length - selectedCount;
 
-  // 3. Contadores
   document.getElementById('statAvailable').textContent = availableCount;
   document.getElementById('statPaid').textContent = paidCount;
   document.getElementById('statPending').textContent = pendingCount;
 
-  // 4. Estado de botón
   const buyerName = document.getElementById('buyerName').value.trim();
   document.getElementById('btnBuy').disabled = !(buyerName.length > 0 && selectedNumbers.size > 0);
 
-  // 5. Generar texto de números disponibles
   updateAvailableText(availableList);
-
-  // 6. Tabla con filtro
   renderTable();
+
+  // Si hay una consulta de ganador abierta, actualizarla automáticamente
+  const currentWinnerQuery = document.getElementById('winnerInput').value.trim();
+  if (currentWinnerQuery.length > 0) {
+    checkWinner();
+  }
 }
 
 function updateAvailableText(availableList) {
@@ -159,6 +160,39 @@ window.copyAvailableText = function() {
     console.error("Error al copiar:", err);
     alert("No se pudo copiar automáticamente.");
   });
+};
+
+// Función para verificar el número ganador
+window.checkWinner = function() {
+  const input = document.getElementById('winnerInput');
+  const resultBox = document.getElementById('winnerResult');
+  let val = input.value.trim();
+
+  if (val === '') {
+    resultBox.style.display = 'none';
+    return;
+  }
+
+  // Si ingresan 1 solo dígito (ej: "5"), formatearlo a "05"
+  const formattedNum = val.padStart(2, '0');
+
+  const winnerData = soldNumbers[formattedNum];
+  resultBox.style.display = 'block';
+
+  if (winnerData) {
+    const isPaid = winnerData.status === 'pagado';
+    resultBox.className = 'winner-box found';
+    resultBox.innerHTML = `
+      🎉 <strong>¡Número ${formattedNum} Registrado!</strong><br>
+      👤 <strong>Comprador:</strong> ${winnerData.buyer}<br>
+      💳 <strong>Estado:</strong> <span class="status-badge ${isPaid ? 'paid' : 'pending'}">${isPaid ? 'Pagado' : 'Pendiente'}</span>
+    `;
+  } else {
+    resultBox.className = 'winner-box not-found';
+    resultBox.innerHTML = `
+      ℹ️ El número <strong>${formattedNum}</strong> <strong>NO fue vendido</strong> (está libre).
+    `;
+  }
 };
 
 function renderTable() {
@@ -287,3 +321,8 @@ listenToRaffleUpdates();
 document.getElementById('buyerName').addEventListener('input', updateUI);
 document.getElementById('searchBuyer').addEventListener('input', renderTable);
 document.getElementById('btnBuy').addEventListener('click', registerPurchase);
+
+// Permitir presionar Enter en el campo de ganador
+document.getElementById('winnerInput').addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') checkWinner();
+});

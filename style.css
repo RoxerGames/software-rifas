@@ -103,7 +103,7 @@ h1, h2 {
   border-radius: 3px;
 }
 
-/* Formulario y Búsqueda */
+/* Formulario */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -299,6 +299,51 @@ th {
 
 .delete-btn:hover {
   background: #dc2626;
+}
+
+/* Apartado Ganador */
+.winner-input-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+#winnerInput {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  max-width: 80px;
+  padding: 0.5rem;
+}
+
+.btn-winner {
+  background-color: #eab308;
+  color: #0f172a;
+  font-weight: bold;
+}
+
+.btn-winner:hover {
+  background-color: #ca8a04;
+}
+
+.winner-box {
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  border: 1px solid var(--border);
+  background: #0b1120;
+}
+
+.winner-box.found {
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.winner-box.not-found {
+  border-color: var(--available);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 /* Compartir */
